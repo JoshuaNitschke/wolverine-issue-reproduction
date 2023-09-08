@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WolverineIssueReproduction.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WolverineIssueReproduction.WebApi", "src\WolverineIssueReproduction.WebApi\WolverineIssueReproduction.WebApi.csproj", "{86C388FC-A13A-4816-848E-A835043AE259}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WolverineIssueReproduction.Tests", "src\WolverineIssueReproduction.Tests\WolverineIssueReproduction.Tests.csproj", "{6AE356AE-8C2F-4F88-B8B7-5639725AAD1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +28,14 @@ Global
 		{86C388FC-A13A-4816-848E-A835043AE259}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86C388FC-A13A-4816-848E-A835043AE259}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86C388FC-A13A-4816-848E-A835043AE259}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AE356AE-8C2F-4F88-B8B7-5639725AAD1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AE356AE-8C2F-4F88-B8B7-5639725AAD1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AE356AE-8C2F-4F88-B8B7-5639725AAD1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AE356AE-8C2F-4F88-B8B7-5639725AAD1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{46D1EA18-C1EB-4D76-A9E9-9F2F0D385283} = {CEC2C729-9F1C-4A19-ADAD-73765ACB99A6}
 		{86C388FC-A13A-4816-848E-A835043AE259} = {CEC2C729-9F1C-4A19-ADAD-73765ACB99A6}
+		{6AE356AE-8C2F-4F88-B8B7-5639725AAD1D} = {CEC2C729-9F1C-4A19-ADAD-73765ACB99A6}
 	EndGlobalSection
 EndGlobal

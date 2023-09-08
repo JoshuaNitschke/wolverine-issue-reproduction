@@ -7,17 +7,17 @@ namespace WolverineIssueReproduction.WebApi.Controllers;
 
 public class TestingEndpoint
 {   
-    [WolverinePost("WorksOnlyIfUseDurableLocalQueuesIsTrue/log")]
+    [WolverinePost("idocument_session/log")]
     public (string, LogCommand) DurableOnlyLog(IDocumentSession session)
     {
         return ("I won't log without durable queues", new LogCommand("I won't log without durable queues!"));
     }
     
-    [WolverinePost("WorksOnlyIfUseDurableLocalQueuesIsTrue/start-saga")]
+    [WolverinePost("idocument_session/start-saga")]
     public (string, StartTest) DurableOnlyTestSaga(IDocumentSession session)
     {
         var id = Guid.NewGuid();
-        return (id.ToString(), new StartTest(id, "I won't start without a durable queue"));
+        return (id.ToString(), new StartTest(id, "I won't start without a durable queue!"));
     }
     
     
@@ -31,6 +31,6 @@ public class TestingEndpoint
     public (string, StartTest) TestSaga()
     {
         var id = Guid.NewGuid();
-        return (id.ToString(), new StartTest(id, "I always start"));
+        return (id.ToString(), new StartTest(id, "I always start!"));
     }
 }

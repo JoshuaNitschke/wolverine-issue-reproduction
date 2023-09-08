@@ -21,4 +21,8 @@
     <ProjectReference Include="..\WolverineIssueReproduction.Application\WolverineIssueReproduction.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="WolverineIssueReproduction.Tests" />
+  </ItemGroup>
+
 </Project>
