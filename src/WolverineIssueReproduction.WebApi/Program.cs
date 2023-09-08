@@ -28,18 +28,8 @@ builder.Host.UseWolverine(opts =>
     opts.Policies.AutoApplyTransactions();
     
     // UNCOMMENT THIS LINE TO SEE THE EXPECTED LOG MESSAGE
-    //opts.Policies.UseDurableLocalQueues(); 
-    
-/*
-info: Wolverine.Runtime.WolverineRuntime[0]
-      Successfully started agent wolverinedb://default/ on node 10a3ab23-67ce-462c-9347-30146a22470b
-info: WolverineIssueReproduction.Application.LogCommandHandler[0]
-      HOWDY!
-info: WolverineIssueReproduction.Application.LogCommand[104]
-      Successfully processed message WolverineIssueReproduction.Application.LogCommand#018a755f-0274-47fd-8e7e-d77bb33cb6d5 from local://wolverineissuereproduction.application.logcommand/
-*/
-    
-    
+    // opts.Policies.UseDurableLocalQueues();
+
     opts.ApplicationAssembly = typeof(IApplicationRoot).Assembly;
 });
 

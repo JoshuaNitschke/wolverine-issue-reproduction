@@ -4,8 +4,8 @@ using JasperFx.Core;
 using Microsoft.Extensions.Logging;
 using Wolverine;
 
-public record StartTest(Guid RequestId);
-public record TestTimeout(Guid Id) : TimeoutMessage(10.Seconds());
+public record StartTest(Guid RequestId, string StartMessage);
+public record TestTimeout(Guid Id) : TimeoutMessage(1.Seconds());
 
 public class TestSaga : Saga
 {
@@ -16,7 +16,7 @@ public class TestSaga : Saga
         TestSaga,
         TestTimeout) Start(StartTest request, ILogger<TestSaga> logger)
     {
-        logger.LogInformation("Got a new request with id {Id}", request.RequestId);
+        logger.LogInformation("Got a new request with id {Id} and {StartMessage}", request.RequestId, request.StartMessage);
         return (
             new TestSaga { Id = request.RequestId },
             new TestTimeout(request.RequestId)

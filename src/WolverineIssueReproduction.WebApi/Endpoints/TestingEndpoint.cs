@@ -10,27 +10,27 @@ public class TestingEndpoint
     [WolverinePost("WorksOnlyIfUseDurableLocalQueuesIsTrue/log")]
     public (string, LogCommand) DurableOnlyLog(IDocumentSession session)
     {
-        return ("I won't log without durable queues", new LogCommand("HOWDY!"));
+        return ("I won't log without durable queues", new LogCommand("I won't log without durable queues!"));
     }
     
     [WolverinePost("WorksOnlyIfUseDurableLocalQueuesIsTrue/start-saga")]
     public (string, StartTest) DurableOnlyTestSaga(IDocumentSession session)
     {
         var id = Guid.NewGuid();
-        return (id.ToString(), new StartTest(id));
+        return (id.ToString(), new StartTest(id, "I won't start without a durable queue"));
     }
     
     
     [WolverinePost("log")]
     public (string, LogCommand) Log()
     {
-        return ("I always log", new LogCommand("HOWDY!"));
+        return ("I always log!", new LogCommand("I always log!"));
     }
     
     [WolverinePost("start-saga")]
     public (string, StartTest) TestSaga()
     {
         var id = Guid.NewGuid();
-        return (id.ToString(), new StartTest(id));
+        return (id.ToString(), new StartTest(id, "I always start"));
     }
 }
