@@ -8,9 +8,9 @@ namespace WolverineIssueReproduction.WebApi.Controllers;
 public class TestingEndpoint
 {   
     [WolverinePost("WorksOnlyIfUseDurableLocalQueuesIsTrue/log")]
-    public (string, LogCommand) DurableOnlyLog(IDocumentSession sessio)
+    public (string, LogCommand) DurableOnlyLog(IDocumentSession session)
     {
-        return ("response", new LogCommand("HOWDY!"));
+        return ("I won't log without durable queues", new LogCommand("HOWDY!"));
     }
     
     [WolverinePost("WorksOnlyIfUseDurableLocalQueuesIsTrue/start-saga")]
@@ -24,7 +24,7 @@ public class TestingEndpoint
     [WolverinePost("log")]
     public (string, LogCommand) Log()
     {
-        return ("why no logs", new LogCommand("HOWDY!"));
+        return ("I always log", new LogCommand("HOWDY!"));
     }
     
     [WolverinePost("start-saga")]
