@@ -20,6 +20,10 @@ builder.Host.ApplyOaktonExtensions();
 
 builder.Host.UseWolverine(opts =>
 {
+    opts.UseSystemTextJsonForSerialization(opt =>
+    {
+        opt.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+    });
     opts.Policies.OnException<ConcurrencyException>().RetryTimes(3);
     opts.Policies
         .OnException<NpgsqlException>()
@@ -39,6 +43,8 @@ builder.Services
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IClock>(SystemClock.Instance);
+
 
 builder.Services.AddMarten(opts =>
     {
@@ -47,12 +53,12 @@ builder.Services.AddMarten(opts =>
             .GetConnectionString("marten");
 
         opts.Connection(connString);
-        opts.UseNodaTime();
         opts.UseDefaultSerialization(
             serializerType: SerializerType.SystemTextJson,
             enumStorage: EnumStorage.AsString,
             casing: Casing.Default
         );
+        opts.UseNodaTime();
     })
     .UseLightweightSessions()
     .IntegrateWithWolverine()

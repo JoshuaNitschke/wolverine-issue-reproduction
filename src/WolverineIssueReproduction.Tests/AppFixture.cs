@@ -1,9 +1,11 @@
 ﻿using Alba;
+using NodaTime;
 using Oakton;
 using Shouldly;
 using Wolverine.Tracking;
 using WolverineIssueReproduction.Application;
 using WolverineIssueReproduction.Application.Sagas;
+using WolverineIssueReproduction.WebApi.Controllers;
 
 
 namespace WolverineIssueReproduction.Tests;
@@ -24,65 +26,15 @@ public class AppFixture : IAsyncLifetime
     }
     
     [Fact]
-    public async Task idocument_session_log_sends_message()
+    public async Task instant_should_serialize_to_and_from_json_string()
     {
         await using var host = await AlbaHost.For<Program>(x => { });
-        var (tracked, result) = await TrackedHttpCall(x =>
-        {
-            x.Post.Text("").ToUrl("/idocument_session/log");
-        });
- 
-        // "tracked" is a Wolverine ITrackedSession object that lets us interrogate
-        // what messages were published, sent, and handled during the testing perioc
-        tracked.Sent.SingleMessage<LogCommand>().Message.ShouldBe("I won't log without durable queues!");
+        var (_, result) = await TrackedHttpCall(x => { x.Get.Url("/now"); });
+        
+        // The JSON formatter was unable to process the raw JSON:
+        // {"nowDateTime":"2023-09-11T16:52:55.1197728-07:00","nowInstant":{}}
+        result.ReadAsJson<NowDto>()?.ShouldNotBeNull();
     }
-    
-    [Fact]
-    public async Task idocument_session_start_saga_sends_message()
-    {
-        await using var host = await AlbaHost.For<Program>(x => { });
-        var (tracked, result) = await TrackedHttpCall(x =>
-        {
-            x.Post.Text("").ToUrl("/idocument_session/start-saga");
-        });
- 
-        // "tracked" is a Wolverine ITrackedSession object that lets us interrogate
-        // what messages were published, sent, and handled during the testing perioc
-        tracked.Sent.SingleMessage<StartTest>().StartMessage.ShouldBe("I won't start without a durable queue!");
-    }
-    
-    
-    [Fact]
-    public async Task log_sends_message()
-    {
-        await using var host = await AlbaHost.For<Program>(x => { });
-        var (tracked, result) = await TrackedHttpCall(x =>
-        {
-            x.Post.Text("").ToUrl("/log");
-        });
- 
-        // "tracked" is a Wolverine ITrackedSession object that lets us interrogate
-        // what messages were published, sent, and handled during the testing perioc
-        tracked.Sent.SingleMessage<LogCommand>().Message.ShouldBe("I always log!");
-    }
-    
-    [Fact]
-    public async Task start_saga_sends_message()
-    {
-        await using var host = await AlbaHost.For<Program>(x => { });
-        var (tracked, result) = await TrackedHttpCall(x =>
-        {
-            x.Post.Text("").ToUrl("/start-saga");
-        });
- 
-        // "tracked" is a Wolverine ITrackedSession object that lets us interrogate
-        // what messages were published, sent, and handled during the testing perioc
-        tracked.Sent.SingleMessage<StartTest>().StartMessage.ShouldBe("I always start!");
-    }
-    
-    
-    
-    
     
     // This method allows us to make HTTP calls into our system
     // in memory with Alba, but do so within Wolverine's test support
