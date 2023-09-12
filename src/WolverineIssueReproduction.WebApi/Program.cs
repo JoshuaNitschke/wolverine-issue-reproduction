@@ -3,6 +3,7 @@ using Marten;
 using Marten.NodaTimePlugin;
 using Marten.Exceptions;
 using Marten.Services.Json;
+using Microsoft.AspNetCore.Http.Json;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using Npgsql;
@@ -17,6 +18,16 @@ using WolverineIssueReproduction.Application;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.ApplyOaktonExtensions();
+
+
+builder.Services.ConfigureHttpJsonOptions(settings => settings.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb));
+
+
+builder.Services.Configure<JsonOptions>(opt =>
+{
+    opt.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+});
+
 
 builder.Host.UseWolverine(opts =>
 {
@@ -73,5 +84,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapWolverineEndpoints();
+
 
 await app.RunOaktonCommands(args);
