@@ -26,14 +26,20 @@ public class AppFixture : IAsyncLifetime
     [Fact]
     public async Task should_not_have_results_does_not_exist_in_namespace_error()
     {
-        var (_, result) = await TrackedHttpCall(x => { x.Get.Url("/problem-details-1"); });
-        result.ReadAsText().ShouldBe("hi");
+        var (_, result) = await TrackedHttpCall(x => { 
+            x.Get.Url("/problem-details-1");            
+            x.StatusCodeShouldBe(400);
+        });
+        
+        result.ReadAsJson<ProblemDetails>().Detail.ShouldBe("Houston, we have a problem!");
     }
     
     [Fact]
     public async Task problem_details_works_fine_here()
     {
-        var (_, result) = await TrackedHttpCall(x => { x.Get.Url("/problem-details-2"); });
+        var (_, result) = await TrackedHttpCall(x => { 
+            x.Get.Url("/problem-details-2");
+        });
         result.ReadAsJson<ProblemDetails>().Detail.ShouldBe("Houston, we have a problem!");
     }
     

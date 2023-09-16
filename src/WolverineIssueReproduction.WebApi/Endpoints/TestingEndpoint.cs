@@ -11,7 +11,7 @@ public class ProblemDetails1Endpoint
     {
         return new ProblemDetails
         {
-            Detail = "Houston, we have a problem!.",
+            Detail = "Houston, we have a problem!",
             Status = 400
         };
             
