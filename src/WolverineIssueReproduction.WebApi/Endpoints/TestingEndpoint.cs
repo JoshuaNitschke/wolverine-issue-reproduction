@@ -1,26 +1,39 @@
 using Marten;
+using Microsoft.AspNetCore.Mvc;
 using NodaTime;
 using Wolverine.Http;
-using WolverineIssueReproduction.Application;
-using WolverineIssueReproduction.Application.Sagas;
 
 namespace WolverineIssueReproduction.WebApi.Controllers;
 
-public class TestingEndpoint
+public class ProblemDetails1Endpoint
 {
-    [WolverineGet("now")]
-    public NowDto Now(IClock clock)
+    public ProblemDetails Before()
     {
-        return new NowDto()
+        return new ProblemDetails
         {
-            NowDateTime = DateTime.Now,
-            NowInstant = clock.GetCurrentInstant()
+            Detail = "Houston, we have a problem!.",
+            Status = 400
         };
+            
+    }
+    
+    [WolverineGet("problem-details-1")]
+    public string Get()
+    {
+        return "hi";
     }
 }
 
-public class NowDto
-{
-    public DateTime NowDateTime { get; set; }
-    public Instant NowInstant { get; set; }
+
+public class ProblemDetails21Endpoint
+{ 
+    [WolverineGet("problem-details-2")]
+    public ProblemDetails Get()
+    {
+        return new ProblemDetails
+        {
+            Detail = "Houston, we have a problem!",
+            Status = 400
+        };    
+    }
 }

@@ -1,10 +1,8 @@
 ﻿using Alba;
-using NodaTime;
+using Microsoft.AspNetCore.Mvc;
 using Oakton;
 using Shouldly;
 using Wolverine.Tracking;
-using WolverineIssueReproduction.Application;
-using WolverineIssueReproduction.Application.Sagas;
 using WolverineIssueReproduction.WebApi.Controllers;
 
 
@@ -26,15 +24,19 @@ public class AppFixture : IAsyncLifetime
     }
     
     [Fact]
-    public async Task instant_should_serialize_to_and_from_json_string()
+    public async Task should_not_have_results_does_not_exist_in_namespace_error()
     {
-        await using var host = await AlbaHost.For<Program>(x => { });
-        var (_, result) = await TrackedHttpCall(x => { x.Get.Url("/now"); });
-        
-        // The JSON formatter was unable to process the raw JSON:
-        // {"nowDateTime":"2023-09-11T16:52:55.1197728-07:00","nowInstant":{}}
-        result.ReadAsJson<NowDto>()?.ShouldNotBeNull();
+        var (_, result) = await TrackedHttpCall(x => { x.Get.Url("/problem-details-1"); });
+        result.ReadAsText().ShouldBe("hi");
     }
+    
+    [Fact]
+    public async Task problem_details_works_fine_here()
+    {
+        var (_, result) = await TrackedHttpCall(x => { x.Get.Url("/problem-details-2"); });
+        result.ReadAsJson<ProblemDetails>().Detail.ShouldBe("Houston, we have a problem!");
+    }
+    
     
     // This method allows us to make HTTP calls into our system
     // in memory with Alba, but do so within Wolverine's test support
