@@ -1,5 +1,6 @@
 using JasperFx.Core;
 using Marten;
+using Marten.Events.Projections;
 using Marten.NodaTimePlugin;
 using Marten.Exceptions;
 using Marten.Services.Json;
@@ -14,6 +15,7 @@ using Wolverine.ErrorHandling;
 using Wolverine.Http;
 using Wolverine.Marten;
 using WolverineIssueReproduction.Application;
+using WolverineIssueReproduction.WebApi.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,9 +43,7 @@ builder.Host.UseWolverine(opts =>
         .RetryWithCooldown(50.Milliseconds(), 100.Milliseconds(), 250.Milliseconds());
     
     opts.Policies.AutoApplyTransactions();
-    
-    // UNCOMMENT THIS LINE TO SEE THE EXPECTED LOG MESSAGE
-    // opts.Policies.UseDurableLocalQueues();
+    opts.Policies.UseDurableLocalQueues();
 
     opts.ApplicationAssembly = typeof(IApplicationRoot).Assembly;
 });
@@ -70,10 +70,12 @@ builder.Services.AddMarten(opts =>
             casing: Casing.Default
         );
         opts.UseNodaTime();
+        opts.Projections.Add<ExampleStreamProjection>(ProjectionLifecycle.Inline);
     })
     .UseLightweightSessions()
     .IntegrateWithWolverine()
     .EventForwardingToWolverine();
+
 
 var app = builder.Build();
 

@@ -1,5 +1,7 @@
 ﻿using Alba;
+using Marten;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Oakton;
 using Shouldly;
 using Wolverine.Tracking;
@@ -16,6 +18,10 @@ public class AppFixture : IAsyncLifetime
     {
         OaktonEnvironment.AutoStartHost = true;
         WebApi = await AlbaHost.For<Program>(x => { });
+        var store = WebApi.Services.GetRequiredService<IDocumentStore>();
+        await store.Advanced.Clean.DeleteAllDocumentsAsync();
+        await store.Advanced.Clean.DeleteAllEventDataAsync();
+        await store.Advanced.Clean.CompletelyRemoveAllAsync();
     }
 
     public async Task DisposeAsync()
@@ -24,23 +30,39 @@ public class AppFixture : IAsyncLifetime
     }
     
     [Fact]
-    public async Task should_not_have_results_does_not_exist_in_namespace_error()
+    public async Task fail1_endpoint_should_track_all_events()
     {
-        var (_, result) = await TrackedHttpCall(x => { 
-            x.Get.Url("/problem-details-1");            
-            x.StatusCodeShouldBe(400);
+        var (tracked, _) = await TrackedHttpCall(x => { 
+            x.Post.Url("/fail1");            
+            x.StatusCodeShouldBe(204);
         });
-        
-        result.ReadAsJson<ProblemDetails>().Detail.ShouldBe("Houston, we have a problem!");
+        tracked.Sent.MessagesOf<NewStreamEvent>().Count().ShouldBe(1);     // PASSES
+        tracked.Sent.MessagesOf<DeleteStreamEvent>().Count().ShouldBe(1); // this one won't get tracked unless I comment out the StartStream line
+        tracked.Sent.MessagesOf<EventFoo>().Count().ShouldBe(2);
+        tracked.Sent.MessagesOf<EventBar>().Count().ShouldBe(1);
     }
     
     [Fact]
-    public async Task problem_details_works_fine_here()
+    public async Task fail2_endpoint_should_track_all_events()
     {
-        var (_, result) = await TrackedHttpCall(x => { 
-            x.Get.Url("/problem-details-2");
+        var (tracked, _) = await TrackedHttpCall(x => { 
+            x.Post.Url("/fail2");            
+            x.StatusCodeShouldBe(204);
         });
-        result.ReadAsJson<ProblemDetails>().Detail.ShouldBe("Houston, we have a problem!");
+        tracked.Sent.MessagesOf<EventFoo>().Count().ShouldBe(2);
+        tracked.Sent.MessagesOf<EventBar>().Count().ShouldBe(1);
+    }
+    
+    [Fact]
+    public async Task ok_endpoint_is_ok()
+    {
+        var (tracked, _) = await TrackedHttpCall(x => { 
+            x.Post.Url("/ok");            
+            x.StatusCodeShouldBe(204);
+        });
+        
+        tracked.Sent.MessagesOf<EventFoo>().Count().ShouldBe(2);
+        tracked.Sent.MessagesOf<EventBar>().Count().ShouldBe(1);
     }
     
     
