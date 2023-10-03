@@ -1,9 +1,11 @@
 ﻿using Alba;
+using Marten;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Oakton;
 using Shouldly;
 using Wolverine.Tracking;
-using WolverineIssueReproduction.Application;
-using WolverineIssueReproduction.Application.Sagas;
+using WolverineIssueReproduction.WebApi.Controllers;
 
 
 namespace WolverineIssueReproduction.Tests;
@@ -16,6 +18,10 @@ public class AppFixture : IAsyncLifetime
     {
         OaktonEnvironment.AutoStartHost = true;
         WebApi = await AlbaHost.For<Program>(x => { });
+        var store = WebApi.Services.GetRequiredService<IDocumentStore>();
+        await store.Advanced.Clean.DeleteAllDocumentsAsync();
+        await store.Advanced.Clean.DeleteAllEventDataAsync();
+        await store.Advanced.Clean.CompletelyRemoveAllAsync();
     }
 
     public async Task DisposeAsync()
@@ -24,64 +30,40 @@ public class AppFixture : IAsyncLifetime
     }
     
     [Fact]
-    public async Task idocument_session_log_sends_message()
+    public async Task fail1_endpoint_should_track_all_events()
     {
-        await using var host = await AlbaHost.For<Program>(x => { });
-        var (tracked, result) = await TrackedHttpCall(x =>
-        {
-            x.Post.Text("").ToUrl("/idocument_session/log");
+        var (tracked, _) = await TrackedHttpCall(x => { 
+            x.Post.Url("/fail1");            
+            x.StatusCodeShouldBe(204);
         });
- 
-        // "tracked" is a Wolverine ITrackedSession object that lets us interrogate
-        // what messages were published, sent, and handled during the testing perioc
-        tracked.Sent.SingleMessage<LogCommand>().Message.ShouldBe("I won't log without durable queues!");
+        tracked.Sent.MessagesOf<NewStreamEvent>().Count().ShouldBe(1);     // PASSES
+        tracked.Sent.MessagesOf<DeleteStreamEvent>().Count().ShouldBe(1); // this one won't get tracked unless I comment out the StartStream line
+        tracked.Sent.MessagesOf<EventFoo>().Count().ShouldBe(2);
+        tracked.Sent.MessagesOf<EventBar>().Count().ShouldBe(1);
     }
     
     [Fact]
-    public async Task idocument_session_start_saga_sends_message()
+    public async Task fail2_endpoint_should_track_all_events()
     {
-        await using var host = await AlbaHost.For<Program>(x => { });
-        var (tracked, result) = await TrackedHttpCall(x =>
-        {
-            x.Post.Text("").ToUrl("/idocument_session/start-saga");
+        var (tracked, _) = await TrackedHttpCall(x => { 
+            x.Post.Url("/fail2");            
+            x.StatusCodeShouldBe(204);
         });
- 
-        // "tracked" is a Wolverine ITrackedSession object that lets us interrogate
-        // what messages were published, sent, and handled during the testing perioc
-        tracked.Sent.SingleMessage<StartTest>().StartMessage.ShouldBe("I won't start without a durable queue!");
-    }
-    
-    
-    [Fact]
-    public async Task log_sends_message()
-    {
-        await using var host = await AlbaHost.For<Program>(x => { });
-        var (tracked, result) = await TrackedHttpCall(x =>
-        {
-            x.Post.Text("").ToUrl("/log");
-        });
- 
-        // "tracked" is a Wolverine ITrackedSession object that lets us interrogate
-        // what messages were published, sent, and handled during the testing perioc
-        tracked.Sent.SingleMessage<LogCommand>().Message.ShouldBe("I always log!");
+        tracked.Sent.MessagesOf<EventFoo>().Count().ShouldBe(2);
+        tracked.Sent.MessagesOf<EventBar>().Count().ShouldBe(1);
     }
     
     [Fact]
-    public async Task start_saga_sends_message()
+    public async Task ok_endpoint_is_ok()
     {
-        await using var host = await AlbaHost.For<Program>(x => { });
-        var (tracked, result) = await TrackedHttpCall(x =>
-        {
-            x.Post.Text("").ToUrl("/start-saga");
+        var (tracked, _) = await TrackedHttpCall(x => { 
+            x.Post.Url("/ok");            
+            x.StatusCodeShouldBe(204);
         });
- 
-        // "tracked" is a Wolverine ITrackedSession object that lets us interrogate
-        // what messages were published, sent, and handled during the testing perioc
-        tracked.Sent.SingleMessage<StartTest>().StartMessage.ShouldBe("I always start!");
+        
+        tracked.Sent.MessagesOf<EventFoo>().Count().ShouldBe(2);
+        tracked.Sent.MessagesOf<EventBar>().Count().ShouldBe(1);
     }
-    
-    
-    
     
     
     // This method allows us to make HTTP calls into our system
