@@ -144,8 +144,8 @@ public class EventHandlers
     
     public async Task Handle(EventFooBar e)
     {
-        var @event = new NewStreamEvent(CombGuidIdGeneration.NewGuid()); // if you comment out this line, tests= 
-        _session.Events.StartStream<ExampleStream>(@event.Id, @event);  // if you comment out this line, the DeleteStreamEvent will get tracked
+        var @event = new NewStreamEvent(CombGuidIdGeneration.NewGuid()); 
+        _session.Events.StartStream<ExampleStream>(@event.Id, @event);   // if you comment out this line or the one below, test events_from_handlers_when_when_work_causes_projection_events_should_not_be_lost will pass
         await _session.SaveChangesAsync();
         await _bus.SendAsync(new EventFoo(e.number));
         await _bus.SendAsync(new EventBar(e.number));
