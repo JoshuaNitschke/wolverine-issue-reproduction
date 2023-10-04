@@ -1,6 +1,5 @@
 ﻿using Alba;
 using Marten;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Oakton;
 using Shouldly;
@@ -50,6 +49,18 @@ public class AppFixture : IAsyncLifetime
             x.StatusCodeShouldBe(204);
         });
         tracked.Sent.MessagesOf<EventFoo>().Count().ShouldBe(2);
+        tracked.Sent.MessagesOf<EventBar>().Count().ShouldBe(1);
+    }
+    
+    [Fact]
+    public async Task events_from_handlers_when_when_work_causes_projection_events_should_not_be_lost()
+    {
+        var (tracked, _) = await TrackedHttpCall(x => { 
+            x.Post.Url("/fail3");            
+            x.StatusCodeShouldBe(204);
+        });
+        tracked.Executed.MessagesOf<EventFooBar>().Count().ShouldBe(1);
+        tracked.Sent.MessagesOf<EventFoo>().Count().ShouldBe(1);
         tracked.Sent.MessagesOf<EventBar>().Count().ShouldBe(1);
     }
     
